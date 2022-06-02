@@ -1,0 +1,23 @@
+{
+  "name": "bad-package-manager",
+  "version": "0.1.0",
+  "description": "A bad package manager",
+  "author": "Ian Sutherland <ian@iansutherland.ca>",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "bad": "bin/bad.js"
+  },
+  "engines": {
+    "node": ">=18.3.0"
+  },
+  "scripts": {
+    "bad": "node bin/bad.js"
+  },
+  "dependencies": {
+    "tar": "^6.1.11"
+  },
+  "devDependencies": {
+    "debug": "^4.3.4"
+  }
+}
