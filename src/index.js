@@ -1,70 +1,48 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { Readable } from 'stream';
-import tar from 'tar';
+import { parseArgs } from 'node:util';
 
-import { debug } from './lib/debug.js';
+import { installCommand } from './commands/install.js';
+import { cleanCommand } from './commands/clean.js';
 
-const deleteNodeModules = async () => {
-  debug('deleting node_modules', path.join(process.cwd(), 'node_modules'));
-
-  return fs.rm(path.join(process.cwd(), 'node_modules'), { recursive: true, force: true });
-};
-
-const getDependencies = async () => {
-  try {
-    const pkg = await fs.readFile(path.join(process.cwd(), 'package.json'), 'utf8');
-    const pkgJson = JSON.parse(pkg);
-
-    const dependencies = {
-      ...pkgJson.dependencies,
-    };
-
-    debug('dependencies', dependencies);
-
-    return dependencies;
-  } catch (error) {
-    console.error('Unable to read package.json', error);
-  }
-};
-
-const installDependencies = async (dependencies) => {
-  for (let [name, version] of Object.entries(dependencies)) {
-    if (version.startsWith('^') || version.startsWith('~')) {
-      version = version.slice(1);
-    }
-
-    const response = await fetch(`https://registry.npmjs.org/${name}/${version}`);
-
-    if (response.ok) {
-      const packument = await response.json();
-
-      debug('tarball', packument.dist.tarball);
-
-      fs.mkdir(path.join(process.cwd(), 'node_modules', name));
-
-      // download and unpack tarball
-      const tarballResponse = await fetch(packument.dist.tarball);
-      // const tarball = tarballResponse.body.pipeThrough(new DecompressionStream('gzip'));
-      // await Readable.fromWeb(tarball).pipe(fileStream);
-
-      await Readable.fromWeb(tarballResponse.body).pipe(
-        tar.x({
-          strip: 1,
-          cwd: path.join(process.cwd(), 'node_modules', name),
-        })
-      );
-    }
-  }
-};
+import { printUsage } from './lib/usage.js';
 
 const main = async () => {
-  await deleteNodeModules();
-  await fs.mkdir(path.join(process.cwd(), 'node_modules'));
+  const mainArgs = process.argv.slice(2);
+  const options = {
+    dev: {
+      type: 'boolean',
+      short: 'd',
+    },
+    silent: {
+      type: 'boolean',
+      short: 's',
+    },
+    verbose: {
+      type: 'boolean',
+      short: 'v',
+    }
+  };
+  const defaults = {
+    since: 'origin/main',
+  };
 
-  const dependencies = await getDependencies();
+  try {
+    const { values, positionals } = parseArgs({ args: mainArgs, options, allowPositionals: true });
+    const args = { ...defaults, ...values };
 
-  installDependencies(dependencies);
+    if (positionals.length !== 1) {
+      printUsage();
+    }
+
+    if (positionals[0] === 'install') {
+      await installCommand(args);
+    } else if (positionals[0] === 'clean') {
+      await cleanCommand();
+    }
+  } catch (error) {
+    console.error(error);
+
+    printUsage();
+  }
 };
 
 export { main };

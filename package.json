@@ -12,7 +12,9 @@
     "node": ">=18.3.0"
   },
   "scripts": {
-    "bad": "node bin/bad.js"
+    "start": "node bin/bad.js",
+    "bad": "node bin/bad.js",
+    "test": "node --test"
   },
   "dependencies": {
     "tar": "^6.1.11"
