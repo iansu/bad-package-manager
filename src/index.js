@@ -21,20 +21,16 @@ const main = async () => {
       short: 'v',
     },
   };
-  const defaults = {
-    since: 'origin/main',
-  };
 
   try {
     const { values, positionals } = parseArgs({ args: mainArgs, options, allowPositionals: true });
-    const args = { ...defaults, ...values };
 
-    if (positionals.length !== 1) {
-      printUsage();
-    }
+    // if (positionals.length > 1) {
+    //   printUsage();
+    // }
 
-    if (positionals[0] === 'install') {
-      await installCommand(args);
+    if (positionals[0] === 'install' || positionals[0] === 'i' || positionals.length === 0) {
+      await installCommand(positionals, values);
     } else if (positionals[0] === 'clean') {
       await cleanCommand();
     }
