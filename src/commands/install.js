@@ -63,7 +63,7 @@ const installCommand = async () => {
   try {
     await installDependencies();
   } catch (error) {
-    console.error(`Install error: ${error}`)
+    console.error(`Install error: ${error}`);
   }
 };
 

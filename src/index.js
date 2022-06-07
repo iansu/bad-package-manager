@@ -19,7 +19,7 @@ const main = async () => {
     verbose: {
       type: 'boolean',
       short: 'v',
-    }
+    },
   };
   const defaults = {
     since: 'origin/main',
